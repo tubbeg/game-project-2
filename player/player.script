@@ -14,6 +14,7 @@ function update(self, dt)
 
 	self.vel.x = 0
 	self.vel.y = 0
+	msg.post("enemy", "playerpos", {pos})
 end
 
 function fixed_update(self, dt)

@@ -13,23 +13,16 @@ instances {
     z: 2.0
   }
 }
+instances {
+  id: "enemy"
+  prototype: "/enemy/enemy.go"
+}
 scale_along_z: 0
 embedded_instances {
   id: "go"
   data: "components {\n"
   "  id: \"main\"\n"
   "  component: \"/main/main.script\"\n"
-  "}\n"
-  "embedded_components {\n"
-  "  id: \"logo\"\n"
-  "  type: \"sprite\"\n"
-  "  data: \"default_animation: \\\"logo\\\"\\n"
-  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "textures {\\n"
-  "  sampler: \\\"texture_sampler\\\"\\n"
-  "  texture: \\\"/main/main.atlas\\\"\\n"
-  "}\\n"
-  "\"\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"background\"\n"
@@ -60,13 +53,11 @@ embedded_instances {
   "fov: 0.7854\\n"
   "near_z: 0.1\\n"
   "far_z: 1000.0\\n"
-  "auto_aspect_ratio: 1\\n"
   "orthographic_projection: 1\\n"
-  "orthographic_mode: ORTHO_MODE_AUTO_FIT\\n"
   "\"\n"
   "}\n"
   ""
   position {
-    z: 293.0
+    z: 178.0
   }
 }

@@ -1,0 +1,47 @@
+function init(self)
+	-- Add initialization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+	self.vel = vmath.vector3()
+	self.playerPosition = nil
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+local function updateVel(playerPosition, enemyPosition)
+	local newVel = vmath.vector3()
+	local speed = 15
+	if not playerPosition then return newVel end
+	local xDiff = playerPosition.x - enemyPosition.x
+	local yDiff = playerPosition.y - enemyPosition.y
+	if xDiff > 0 then
+		newVel.x = speed
+	end
+	if yDiff > 0 then
+		newVel.y = speed
+	end
+	if xDiff < 0 then
+		newVel.x = -speed
+	end
+	if yDiff < 0 then
+		newVel.y = -speed
+	end
+	return newVel
+end
+
+function update(self, dt)
+	local ePos = go.get_position(".")
+	self.vel = updateVel(self.playerPosition, ePos)
+	local newPosition = ePos + dt * self.vel
+	go.set_position(newPosition, ".")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("playerpos") then
+		self.playerPosition = message[1]
+	end
+end
