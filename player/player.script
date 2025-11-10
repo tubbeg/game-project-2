@@ -1,5 +1,6 @@
 function init(self)
 	msg.post(".", "acquire_input_focus")
+	--msg.post("#camera", "acquire_camera_focus")
 	self.vel = vmath.vector3()
 end
 
