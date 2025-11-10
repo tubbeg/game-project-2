@@ -4,6 +4,8 @@ function init(self)
 	-- Remove this function if not needed
 	self.vel = vmath.vector3()
 	self.playerPosition = nil
+	self.collided = false
+	self.collTimeout = {current=0, limit=4, start=false}
 end
 
 function final(self)
@@ -14,7 +16,7 @@ end
 
 local function updateVel(playerPosition, enemyPosition)
 	local newVel = vmath.vector3()
-	local speed = 15
+	local speed = 30
 	if not playerPosition then return newVel end
 	local xDiff = playerPosition.x - enemyPosition.x
 	local yDiff = playerPosition.y - enemyPosition.y
@@ -33,9 +35,34 @@ local function updateVel(playerPosition, enemyPosition)
 	return newVel
 end
 
+local function addKnockBack(vel)
+	if vel.x > 0 then
+		vel.x = vel.x - 300
+	else
+		vel.x = vel.x + 300
+	end
+	if vel.y > 0 then
+		vel.y = vel.y - 300
+	else
+		vel.y = vel.y + 300
+	end
+end
+
 function update(self, dt)
 	local ePos = go.get_position(".")
 	self.vel = updateVel(self.playerPosition, ePos)
+	if self.collided then 
+		if not self.collTimeout.start then
+			self.vel = self.vel * (-100)
+			self.collTimeout.start = true
+		end
+		if self.collTimeout.current > self.collTimeout.limit then
+			self.collided = false
+			self.collTimeout.start = false
+			self.collTimeout.current = 0
+		end
+	end
+	self.collTimeout.current = self.collTimeout.current + dt
 	local newPosition = ePos + dt * self.vel
 	go.set_position(newPosition, ".")
 end
@@ -43,5 +70,12 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash("playerpos") then
 		self.playerPosition = message[1]
+	end
+	--if  message_id == hash("contact_point_response") then  print ("stuff") end
+	if message_id == hash("collision_response") then
+		if not self.collided then
+			print("collide2")
+			self.collided = true
+		end
 	end
 end
