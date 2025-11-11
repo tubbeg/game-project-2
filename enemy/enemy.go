@@ -36,9 +36,9 @@ embedded_components {
   "    count: 3\n"
   "    id: \"box\"\n"
   "  }\n"
-  "  data: 12.785404\n"
-  "  data: 26.806976\n"
-  "  data: 10.0\n"
+  "  data: 6.708544\n"
+  "  data: 19.06072\n"
+  "  data: 9.8\n"
   "}\n"
   ""
 }

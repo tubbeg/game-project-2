@@ -72,10 +72,10 @@ function on_message(self, message_id, message, sender)
 		self.playerPosition = message[1]
 	end
 	--if  message_id == hash("contact_point_response") then  print ("stuff") end
-	if message_id == hash("collision_response") then
-		if not self.collided then
-			print("collide2")
-			self.collided = true
-		end
+	if message_id == hash("contact_point_response") then
+		local currentPosition = go.get_position(".")
+		local constant = 40
+		local nextPosition = currentPosition + (constant * message.normal)
+		go.set_position(nextPosition, ".")
 	end
 end
