@@ -28,6 +28,7 @@ local function updateVel(playerPosition, enemyPosition)
 	return newVel
 end
 
+
 function update(self, dt)
 	self.corr = vmath.vector3()
 	local ePos = go.get_position(".")
@@ -36,18 +37,52 @@ function update(self, dt)
 	go.set_position(newPosition, ".")
 end
 
-function on_message(self, message_id, message, sender)
-	if message_id == hash("playerpos") then
+function update_player_pos(self, id, message)
+	
+	if id == hash("playerpos") then
 		self.playerPosition = message[1]
 	end
-	if message_id == hash("contact_point_response") then
+end
+
+local function move_enemy(self, message)
+	
+	local projection = vmath.project(self.corr, message.normal * message.distance)
+	if projection > 1 then return end
+	local compensate = (message.distance - message.distance * projection) * message.normal
+	local currentPosition = go.get_position(".")
+	go.set_position(currentPosition + compensate)
+	self.corr = self.corr + compensate
+end
+
+local function hasBullet(url)
+	-- safe way to check if something has a property
+	-- unfortunately this does not work in my case for
+	-- some reason
+	local ret = pcall(go.get, url , "bullet")
+	return ret
+end
+
+local function handle_collision(self, id, message, sender)
+	if id == hash("contact_point_response") then
+		local url = msg.url(message.other_id)
+		-- i suspect that the sender isn't actually the bullet, but rather the
+		-- collisionobject of either the bullet or the enemy, so use
+		-- message.other_id instead
+		msg.post(url, "hellobullet", {enemy_id=go.get_id()})
 		if message.distance <= 0 then return end
-		local projection = vmath.project(self.corr, message.normal * message.distance)
-		if projection > 1 then return end
-		local compensate = (message.distance - message.distance * projection) * message.normal
-		local currentPosition = go.get_position(".")
-		go.set_position(currentPosition + compensate)
-		self.corr = self.corr + compensate
+		move_enemy(self, message)
 	end
+end
+
+local function killEnemy(message_id)
+	if message_id == hash("die") then
+		go.delete(".")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	update_player_pos(self, message_id, message)
+	handle_collision(self, message_id, message, sender)
+	killEnemy(message_id)
 end
 

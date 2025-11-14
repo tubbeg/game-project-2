@@ -1,24 +1,24 @@
 components {
-  id: "player"
-  component: "/player/player.script"
+  id: "bullet"
+  component: "/bullet/bullet.script"
 }
 embedded_components {
   id: "sprite"
   type: "sprite"
   data: "default_animation: \"banana\"\n"
   "material: \"/builtins/materials/sprite.material\"\n"
-  "size {\n"
-  "  x: 128.0\n"
-  "  y: 128.0\n"
-  "}\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/player/player.atlas\"\n"
+  "  texture: \"/bullet/bullet.atlas\"\n"
   "}\n"
   ""
   rotation {
-    z: -0.5476839
-    w: 0.83668536
+    z: 0.49210542
+    w: 0.8705356
+  }
+  scale {
+    x: 0.327037
+    y: -0.053426
   }
 }
 embedded_components {
@@ -32,23 +32,15 @@ embedded_components {
   "mask: \"default\"\n"
   "embedded_collision_shape {\n"
   "  shapes {\n"
-  "    shape_type: TYPE_BOX\n"
+  "    shape_type: TYPE_SPHERE\n"
   "    position {\n"
   "    }\n"
   "    rotation {\n"
   "    }\n"
   "    index: 0\n"
-  "    count: 3\n"
+  "    count: 1\n"
   "  }\n"
-  "  data: 10.0\n"
-  "  data: 10.0\n"
-  "  data: 10.0\n"
+  "  data: 5.6835976\n"
   "}\n"
-  ""
-}
-embedded_components {
-  id: "factory"
-  type: "factory"
-  data: "prototype: \"/bullet/bullet.go\"\n"
   ""
 }

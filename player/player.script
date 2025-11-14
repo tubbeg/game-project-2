@@ -1,25 +1,71 @@
+
+local function launchBullet(self)
+	local p = go.get_position()
+	local id = factory.create("#factory", p)
+	table.insert(self.bullets, id)
+	for _,enemy in pairs(self.enemies) do
+		if go.exists(msg.url(enemy)) then
+			msg.post(enemy, "newbullet", {bullet_url=msg.url(id)})
+		end
+	end
+end
+
 function init(self)
 	msg.post(".", "acquire_input_focus")
-	--msg.post("#camera", "acquire_camera_focus")
 	self.vel = vmath.vector3()
 	self.enemies = {}
+	self.bullets = {}
+	timer.delay(0.5, true, function() launchBullet(self) end)
 end
 
 function final(self)
 end
 
-function update(self, dt)
+local function updatePosition(self, dt)
 	local pos = go.get_position()
 	pos = pos + self.vel * dt
 	go.set_position(pos)
 
 	self.vel.x = 0
 	self.vel.y = 0
+end
+
+local function broadcastPosition(self)
+	local pos = go.get_position()
 	for _,enemy in pairs(self.enemies) do
 		msg.post(enemy, "playerpos", {pos})
 	end
-	msg.post("enemy", "playerpos", {pos})
 end
+
+
+local function removeNonExistingBullets(self)
+	local newTable = {}
+	for _, b_id in pairs(self.bullets) do
+		if go.exists(msg.url(b_id)) then
+			table.insert(newTable,b_id)
+		end
+	end
+	self.bullets = newTable
+end
+
+local function removeNonExistingEnemies(self)
+	local newTable = {}
+	for _, enemy_id in pairs(self.enemies) do
+		if go.exists(msg.url(enemy_id)) then
+			table.insert(newTable,enemy_id)
+		end
+	end
+	self.enemies = newTable
+end
+
+function update(self, dt)
+	removeNonExistingBullets(self)
+	removeNonExistingEnemies(self)
+	updatePosition(self, dt)
+	broadcastPosition(self)
+end
+
+
 
 function fixed_update(self, dt)
 end
