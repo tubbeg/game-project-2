@@ -1,4 +1,5 @@
 
+go.property("bullet", true)
 
 function init(self)
 	self.speed = vmath.vector3()

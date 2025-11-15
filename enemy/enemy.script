@@ -54,35 +54,37 @@ local function move_enemy(self, message)
 	self.corr = self.corr + compensate
 end
 
-local function hasBullet(url)
+local function hasBullet(message)
 	-- safe way to check if something has a property
-	-- unfortunately this does not work in my case for
-	-- some reason
-	local ret = pcall(go.get, url , "bullet")
+	-- unfortunately this does not work. I suspect
+	-- that I have the wrong URL, but I don't know
+	-- why
+	local url = msg.url(message.other_id)
+	local ret = pcall(go.get, url, "bullet")
 	return ret
 end
 
 local function handle_collision(self, id, message, sender)
 	if id == hash("contact_point_response") then
-		local url = msg.url(message.other_id)
 		-- i suspect that the sender isn't actually the bullet, but rather the
 		-- collisionobject of either the bullet or the enemy, so use
 		-- message.other_id instead
-		msg.post(url, "hellobullet", {enemy_id=go.get_id()})
+		msg.post(message.other_id, "hellobullet", {enemy_id=go.get_id()})
+		--if hasBullet(message) then print("hurray") end
 		if message.distance <= 0 then return end
 		move_enemy(self, message)
 	end
 end
 
-local function killEnemy(message_id)
+local function kill_enemy(message_id)
 	if message_id == hash("die") then
-		go.delete(".")
+		go.delete()
 	end
 end
 
 function on_message(self, message_id, message, sender)
 	update_player_pos(self, message_id, message)
 	handle_collision(self, message_id, message, sender)
-	killEnemy(message_id)
+	kill_enemy(message_id)
 end
 
