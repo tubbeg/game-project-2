@@ -45,7 +45,7 @@ function update_player_pos(self, id, message)
 end
 
 local function move_enemy(self, message)
-	
+	if message.distance <= 0 then return end
 	local projection = vmath.project(self.corr, message.normal * message.distance)
 	if projection > 1 then return end
 	local compensate = (message.distance - message.distance * projection) * message.normal
@@ -57,35 +57,29 @@ end
 local function hasBullet(message)
 	-- safe way to check if a game object has a property. This won't be necessary
 	-- because I learned that Defold has collision groups. Also the messaging system
-	-- (my current solutino) would probably still be better than accessing properties,
+	-- (my current solution) would probably still be better than accessing properties
 	-- because of decoupling.
 	local s3 = string.sub(tostring(message.other_id), 8, -2) .. "#bullet"
 	local ret = pcall(go.get, s3, "bullet")
 	return ret
 end
 
-local function handle_collision(self, id, message, sender)
-	if id == hash("contact_point_response") then
-		-- i suspect that the sender isn't actually the bullet, but rather the
-		-- collisionobject of either the bullet or the enemy, so use
-		-- message.other_id instead
-		msg.post(message.other_id, "hellobullet", {enemy_id=go.get_id()})
-		--hasBullet(message)
-		if hasBullet(message) then print("hurray") end
-		if message.distance <= 0 then return end
-		move_enemy(self, message)
-	end
+local function is_bullets_group(collision_message)
+	return collision_message.other_group == hash("bullets")
 end
 
-local function kill_enemy(message_id)
-	if message_id == hash("die") then
-		go.delete()
+local function handle_collision(self, id, message, sender)
+	if id == hash("contact_point_response") then
+		if is_bullets_group(message) then
+			print("goodbye")
+			go.delete()
+		end
+		move_enemy(self, message)
 	end
 end
 
 function on_message(self, message_id, message, sender)
 	update_player_pos(self, message_id, message)
 	handle_collision(self, message_id, message, sender)
-	kill_enemy(message_id)
 end
 

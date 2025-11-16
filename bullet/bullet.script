@@ -26,11 +26,6 @@ function update(self, dt)
 end
 
 function on_message(self, message_id, message, sender)
-	if message_id == hash("hellobullet") then
-		if go.exists(message.enemy_id) then 
-			msg.post(message.enemy_id, "die")
-		end
-	end
 end
 
 function on_input(self, action_id, action)
