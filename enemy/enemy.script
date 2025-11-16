@@ -55,12 +55,12 @@ local function move_enemy(self, message)
 end
 
 local function hasBullet(message)
-	-- safe way to check if something has a property
-	-- unfortunately this does not work. I suspect
-	-- that I have the wrong URL, but I don't know
-	-- why
-	local url = msg.url(message.other_id)
-	local ret = pcall(go.get, url, "bullet")
+	-- safe way to check if a game object has a property. This won't be necessary
+	-- because I learned that Defold has collision groups. Also the messaging system
+	-- (my current solutino) would probably still be better than accessing properties,
+	-- because of decoupling.
+	local s3 = string.sub(tostring(message.other_id), 8, -2) .. "#bullet"
+	local ret = pcall(go.get, s3, "bullet")
 	return ret
 end
 
@@ -70,7 +70,8 @@ local function handle_collision(self, id, message, sender)
 		-- collisionobject of either the bullet or the enemy, so use
 		-- message.other_id instead
 		msg.post(message.other_id, "hellobullet", {enemy_id=go.get_id()})
-		--if hasBullet(message) then print("hurray") end
+		--hasBullet(message)
+		if hasBullet(message) then print("hurray") end
 		if message.distance <= 0 then return end
 		move_enemy(self, message)
 	end
