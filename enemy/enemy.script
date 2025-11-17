@@ -55,13 +55,12 @@ local function move_enemy(self, message)
 end
 
 local function hasBullet(message)
-	-- safe way to check if a game object has a property. This won't be necessary
-	-- because I learned that Defold has collision groups. Also the messaging system
-	-- (my current solution) would probably still be better than accessing properties
-	-- because of decoupling.
-	local s3 = string.sub(tostring(message.other_id), 8, -2) .. "#bullet"
-	local ret = pcall(go.get, s3, "bullet")
-	return ret
+	-- safe (and correct) way to inspect properties on game objects.
+	-- I could use this function and set a property on the bullet to
+	-- add different behaviour on collison. This won't be necessary
+	-- however since I can use collision groups.
+	local url = msg.url(nil, message.other_id, "bullet")
+	return pcall(go.get, url, "bullet")
 end
 
 local function is_bullets_group(collision_message)
@@ -71,6 +70,7 @@ end
 local function handle_collision(self, id, message, sender)
 	if id == hash("contact_point_response") then
 		if is_bullets_group(message) then
+			if hasBullet(message) then print ("hurray") end
 			print("goodbye")
 			go.delete()
 		end
