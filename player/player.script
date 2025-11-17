@@ -88,6 +88,24 @@ function on_message(self, message_id, message, sender)
 		table.insert(self.enemies, message.enemy)
 	end
 	stop_resume_moving_player(message_id, message)
+	if message_id == hash("trigger_response") then
+		print("detected response")
+		if message.other_group == hash("bounds_y") then
+			if message.enter then
+				msg.post("cam", "stop-follow-y")
+			else 
+				msg.post("cam", "resume-follow-y")
+			end
+		end
+		if message.other_group == hash("bounds_x") then
+			if message.enter then
+				msg.post("cam", "stop-follow-x")
+			else 
+				msg.post("cam", "resume-follow-x")
+			end
+		end
+	end
+	
 end
 
 function on_input(self, action_id, action)

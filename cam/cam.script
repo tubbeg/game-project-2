@@ -1,7 +1,6 @@
 function init(self)
-	-- Add initialization code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
+	self.follow_y = true
+	self.follow_x = true
 end
 
 function final(self)
@@ -26,14 +25,33 @@ function fixed_update(self, dt)
 end
 
 function on_message(self, message_id, message, sender)
-	
 	if message_id == hash("playerpos") then
+		local current_pos = go.get_position()
 		local p = vmath.vector3()
-		local currentPosition = go.get_position()
-		p.x = message[1].x
-		p.y = message[1].y
-		p.z = currentPosition.z
+		if self.follow_x then
+			p.x = message[1].x
+		else
+			p.x = current_pos.x
+		end
+		if self.follow_y then
+			p.y = message[1].y
+		else
+			p.y = current_pos.y
+		end
+		p.z = current_pos.z
 		go.set_position(p)
+	end
+	if message_id == hash("stop-follow-y") then
+		self.follow_y = false
+	end
+	if message_id == hash("resume-follow-y") then
+		self.follow_y = true
+	end
+	if message_id == hash("stop-follow-x") then
+		self.follow_x = false
+	end
+	if message_id == hash("resume-follow-x") then
+		self.follow_x = true
 	end
 end
 

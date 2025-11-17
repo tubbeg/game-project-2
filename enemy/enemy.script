@@ -70,8 +70,8 @@ end
 local function handle_collision(self, id, message, sender)
 	if id == hash("contact_point_response") then
 		if is_bullets_group(message) then
-			if hasBullet(message) then print ("hurray") end
-			print("goodbye")
+			--if hasBullet(message) then print ("hurray") end
+			--print("goodbye")
 			go.delete()
 		end
 		move_enemy(self, message)
