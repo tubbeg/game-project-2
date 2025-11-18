@@ -2,20 +2,13 @@
 local function launchBullet(self)
 	local p = go.get_position()
 	local id = factory.create("#factory", p)
-	table.insert(self.bullets, id)
-	for _,enemy in pairs(self.enemies) do
-		if go.exists(msg.url(enemy)) then
-			msg.post(enemy, "newbullet", {bullet_url=msg.url(id)})
-		end
-	end
 end
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
 	self.vel = vmath.vector3()
-	self.enemies = {}
-	self.bullets = {}
-	self.move = true
+	self.xp = 0
+	self.level = 1
 	timer.delay(0.5, true, function() launchBullet(self) end)
 end
 
@@ -31,42 +24,8 @@ local function updatePosition(self, dt)
 	self.vel.y = 0
 end
 
-local function broadcastPosition(self)
-	local pos = go.get_position()
-	for _,enemy in pairs(self.enemies) do
-		msg.post(enemy, "playerpos", {pos})
-	end
-	msg.post("cam", "playerpos", {pos})
-end
-
-
-local function removeNonExistingBullets(self)
-	local newTable = {}
-	for _, b_id in pairs(self.bullets) do
-		if go.exists(msg.url(b_id)) then
-			table.insert(newTable,b_id)
-		end
-	end
-	self.bullets = newTable
-end
-
-local function removeNonExistingEnemies(self)
-	local newTable = {}
-	for _, enemy_id in pairs(self.enemies) do
-		if go.exists(msg.url(enemy_id)) then
-			table.insert(newTable,enemy_id)
-		end
-	end
-	self.enemies = newTable
-end
-
 function update(self, dt)
-	removeNonExistingBullets(self)
-	removeNonExistingEnemies(self)
-	if self.move then 
-		updatePosition(self, dt)
-	end
-	broadcastPosition(self)
+	updatePosition(self, dt)
 end
 
 
@@ -74,38 +33,32 @@ end
 function fixed_update(self, dt)
 end
 
-local function stop_resume_moving_player(message_id, message)
-	if message_id == hash("stop-player") then
-		self.move = false
+local function handleBoundsCollision(message)
+	if message.other_group == hash("bounds_y") then
+		if message.enter then
+			msg.post("cam", "stop-follow-y")
+		else 
+			msg.post("cam", "resume-follow-y")
+		end
 	end
-	if message_id == hash("resume-player") then
-		self.move = true
+	if message.other_group == hash("bounds_x") then
+		if message.enter then
+			msg.post("cam", "stop-follow-x")
+		else 
+			msg.post("cam", "resume-follow-x")
+		end
 	end
 end
 
+
+
 function on_message(self, message_id, message, sender)
-	if message_id == hash("new-enemy") then
-		table.insert(self.enemies, message.enemy)
-	end
-	stop_resume_moving_player(message_id, message)
 	if message_id == hash("trigger_response") then
-		print("detected response")
-		if message.other_group == hash("bounds_y") then
-			if message.enter then
-				msg.post("cam", "stop-follow-y")
-			else 
-				msg.post("cam", "resume-follow-y")
-			end
-		end
-		if message.other_group == hash("bounds_x") then
-			if message.enter then
-				msg.post("cam", "stop-follow-x")
-			else 
-				msg.post("cam", "resume-follow-x")
-			end
-		end
+		handleBoundsCollision(message)
 	end
-	
+	if message_id == hash("get-player-pos") then
+		msg.post(sender, "player-pos", {player_pos=go.get_position()})
+	end
 end
 
 function on_input(self, action_id, action)

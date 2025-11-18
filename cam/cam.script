@@ -10,9 +10,7 @@ function final(self)
 end
 
 function update(self, dt)
-	-- Add update code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
+	msg.post("player", "get-player-pos")
 end
 
 function fixed_update(self, dt)
@@ -24,23 +22,28 @@ function fixed_update(self, dt)
 	-- Remove this function if not needed
 end
 
-function on_message(self, message_id, message, sender)
-	if message_id == hash("playerpos") then
-		local current_pos = go.get_position()
-		local p = vmath.vector3()
-		if self.follow_x then
-			p.x = message[1].x
-		else
-			p.x = current_pos.x
-		end
-		if self.follow_y then
-			p.y = message[1].y
-		else
-			p.y = current_pos.y
-		end
-		p.z = current_pos.z
-		go.set_position(p)
+local function update_cam_pos(self,message)
+	-- it's quite easy to get the player pos without
+	-- messaging, but I think decoupling is preferable.
+	-- There's less risk of things crashing in the future.
+	local current_pos = go.get_position()
+	local p = vmath.vector3()
+	if self.follow_x then
+		p.x = message.player_pos.x
+	else
+		p.x = current_pos.x
 	end
+	if self.follow_y then
+		p.y = message.player_pos.y
+	else
+		p.y = current_pos.y
+	end
+	p.z = current_pos.z
+	go.set_position(p)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("player-pos") then update_cam_pos(self,message) end
 	if message_id == hash("stop-follow-y") then
 		self.follow_y = false
 	end

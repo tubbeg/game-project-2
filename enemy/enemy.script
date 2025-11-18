@@ -1,18 +1,18 @@
 function init(self)
 	self.vel = vmath.vector3()
-	self.playerPosition = nil
+	self.player_pos = nil
 	self.corr = vmath.vector3()
 end
 
 function final(self)
 end
 
-local function updateVel(playerPosition, enemyPosition)
+local function updateVel(player_pos, enemy_pos)
 	local newVel = vmath.vector3()
 	local speed = 30
-	if not playerPosition then return newVel end
-	local xDiff = playerPosition.x - enemyPosition.x
-	local yDiff = playerPosition.y - enemyPosition.y
+	if not player_pos then return newVel end
+	local xDiff = player_pos.x - enemy_pos.x
+	local yDiff = player_pos.y - enemy_pos.y
 	if xDiff > 0 then
 		newVel.x = speed
 	end
@@ -31,17 +31,11 @@ end
 
 function update(self, dt)
 	self.corr = vmath.vector3()
-	local ePos = go.get_position(".")
-	self.vel = updateVel(self.playerPosition, ePos)
-	local newPosition = ePos + dt * self.vel
-	go.set_position(newPosition, ".")
-end
-
-function update_player_pos(self, id, message)
-	
-	if id == hash("playerpos") then
-		self.playerPosition = message[1]
-	end
+	local enemy_pos = go.get_position()
+	self.vel = updateVel(self.player_pos, enemy_pos)
+	local newPosition = enemy_pos + dt * self.vel
+	go.set_position(newPosition)
+	msg.post("player", "get-player-pos")
 end
 
 local function move_enemy(self, message)
@@ -54,7 +48,7 @@ local function move_enemy(self, message)
 	self.corr = self.corr + compensate
 end
 
-local function hasBullet(message)
+local function has_bullet(message)
 	-- safe (and correct) way to inspect properties on game objects.
 	-- I could use this function and set a property on the bullet to
 	-- add different behaviour on collison. This won't be necessary
@@ -70,8 +64,6 @@ end
 local function handle_collision(self, id, message, sender)
 	if id == hash("contact_point_response") then
 		if is_bullets_group(message) then
-			--if hasBullet(message) then print ("hurray") end
-			--print("goodbye")
 			go.delete()
 		end
 		move_enemy(self, message)
@@ -79,7 +71,9 @@ local function handle_collision(self, id, message, sender)
 end
 
 function on_message(self, message_id, message, sender)
-	update_player_pos(self, message_id, message)
 	handle_collision(self, message_id, message, sender)
+	if message_id == hash("player-pos") then
+		self.player_pos = message.player_pos
+	end
 end
 
