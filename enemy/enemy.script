@@ -28,6 +28,16 @@ local function updateVel(player_pos, enemy_pos)
 	return newVel
 end
 
+local function post_pos_to_player()
+	local constant = 0.4
+	local size = go.get("#sprite", "size")
+	local p = go.get_position()
+	-- the position is not exactly at the center so 
+	-- we'll compensate by adding the size of the sprite
+	--p.x = p.x + (size.x * constant)
+	--p.y = p.y + (size.y * constant)
+	msg.post("player", "enemy-data", {enemy_pos=p})
+end
 
 function update(self, dt)
 	self.corr = vmath.vector3()
@@ -36,6 +46,7 @@ function update(self, dt)
 	local newPosition = enemy_pos + dt * self.vel
 	go.set_position(newPosition)
 	msg.post("player", "get-player-pos")
+	post_pos_to_player()
 end
 
 local function move_enemy(self, message)

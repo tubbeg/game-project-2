@@ -11,7 +11,9 @@ end
 function init(self)
 	self.vel = vmath.vector3()
 	set_random_velocity(self)
-	self.vel = self.vel * 100
+	self.target = nil
+	self.const_acc = 100
+	self.vel = self.vel * self.const_acc
 	timer.delay(2, false, function() go.delete() end)
 end
 
@@ -25,6 +27,23 @@ function update(self, dt)
 end
 
 function on_message(self, message_id, message, sender)
+	if message_id == hash("enemy-pos") then
+		if not self.target then
+			self.target = message.enemy_pos
+		end
+		local current_diff = self.target - go.get_position()
+		local diff = self.target - message.enemy_pos
+		if diff < current_diff then
+			self.target = message.enemy_pos
+		end
+	end
+	if message_id == hash("new-velocity") then
+		self.vel = vmath.vector3()
+		self.vel.x = message.velocity.x
+		self.vel.y = message.velocity.y
+		self.vel = self.vel * self.const_acc
+		self.vel = vmath.clamp(self.vel, -100, 100)
+	end
 end
 
 function on_input(self, action_id, action)
